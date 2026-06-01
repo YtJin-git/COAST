@@ -1,0 +1,85 @@
+model:
+  model_name: ThreeBranchesPretrain
+  clip_model: "ViT-L/14"
+  clip_arch: ./pretrained_clip/ViT-L-14.pt
+  prompt_template: ["a photo of x x", "a photo of x", "a photo of x"]
+  ctx_init: ["a photo of ", "a photo of ", "a photo of "]
+  adapter_dim: 64
+  adapter_dropout: 0.1
+  pair_loss_weight: 1.0
+  pair_inference_weight: 1.0
+  attr_loss_weight: 1.0
+  attr_inference_weight: 1.0
+  obj_loss_weight: 1.0
+  obj_inference_weight: 1.0
+
+train:
+  cuda_device: 0
+  seed: 3407
+  dataset: cgqa
+  dataset_path: ./datasets/cgqa
+  optimizer: AdamW
+  scheduler: StepLR
+  lr: 0.000125
+  weight_decay: 0.00001
+  step_size: 5
+  gamma: 0.5
+  gradient_accumulation_steps: 1
+  epochs: 15
+  epoch_start: 0
+  train_batch_size: 64
+  context_length: 8
+  attr_dropout: 0.1
+  val_metric: AUC
+  save_final_model: True
+  save_every_n: 50
+  save_path: ./logs/ThreeBranchesPretrain_CGQA_20260420
+  kl_loss_weight: 0.5
+
+test:
+  eval_batch_size: 256
+  text_encoder_batch_size: 1024
+  text_first: True
+  open_world: True
+  topk: 1
+  threshold_trials: 50
+  bias: 0.001
+
+tta:
+  tta_function: predict_logits_text_first_with_coast
+  load_model: ./checkpoints/ThreeBranchesPretrain_CGQA/test_best.pt
+  load_model_path: ./checkpoints/ThreeBranchesPretrain_CGQA
+  use_wandb: False
+  use_img_cache: True
+  cpu_cache: False
+  shot_capacity: 3
+  alpha: 0.8
+  beta: 10
+  theta: 1
+  text_lr: 0.00000625
+  image_lr: 0.00000625
+  eps: 0.001
+  wd: 0.0001
+  entropy_threshold: 3.5
+  margin_threshold: 0.3
+  routing_temp: 0.4
+  distill_weight: 0.8
+  use_align_loss: True
+  align_loss_weight: 1.75
+  use_kl_loss: True
+  kl_entropy_threshold: 0.5
+  topk_local: 128
+  use_local_subspace: False
+  use_factored_cache: False
+  use_entropy_norm: True
+  margin_ema_decay: 0.99
+  consistency_topk: 5
+  use_div_loss: True
+  div_weight: 1.5
+  div_queue_size: 256
+  use_tpt: True
+  tpt_k: 256
+  tpt_lr: 0.00005
+  use_lap_loss: True
+  lap_weight: 1.0
+  lap_threshold: 0.9
